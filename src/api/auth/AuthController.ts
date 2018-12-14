@@ -26,8 +26,6 @@ class AuthController {
     }
 
     // passport method
-
-
     LocalFunction = async (username, password, done) => {
         debug("@flow login")
         try {

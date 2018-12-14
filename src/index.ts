@@ -7,12 +7,19 @@ import * as bodyParser from 'body-parser'
 import * as helmet from 'helmet'
 import * as rateLimit from 'express-rate-limit'
 import * as passport from 'passport'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+
 import { getCustomRepository } from 'typeorm'
 import UserMapper from './mapper/UserMapper'
 import { UserIF } from './entity/User'
 
 // route
 import * as route from './api'
+
+const cookieSession = require('cookie-session')
+
+dotenv.config()
 
 const app: Express.Application = Express()
 const port: string | number = process.env.PORT || 3018
@@ -23,6 +30,9 @@ app.use(helmet())
 
 // set trust proxy
 app.enable("trust proxy")
+
+// static
+app.use(version + '/static', Express.static(path.join(__dirname, 'public')))
 
 // use cors
 const whitelist = ['http://localhost:3000', undefined]
@@ -49,6 +59,15 @@ app.use(bodyParser.json({ limit: '50mb' }))
 // set rate limit
 const limiter = new rateLimit({ windowMs: 10 * 60 * 1000, max: 24 })
 app.use(limiter)
+
+// cookie
+app.use(cookieSession({
+    name: "cf_1",
+    keys: [process.env.COOKIE_KEY],
+    maxAge: 7776000 * 1000,
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    httpOnly: true
+}))
 
 // connect database
 createConnection()
